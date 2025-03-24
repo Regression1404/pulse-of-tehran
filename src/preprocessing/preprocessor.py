@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from scipy import stats
 from persiantools.jdatetime import JalaliDateTime
 
 
@@ -104,7 +105,30 @@ class TrafficPreprocessor:
                            "estimated number"]
 
         self.df[vehicle_columns] = self.df[vehicle_columns].replace(0, np.nan)
-        self.df[vehicle_columns] = self.df[vehicle_columns].interpolate(method="polynomial", limit=2)
+        self.df[vehicle_columns] = self.df[vehicle_columns].interpolate(method="linear", limit_direction="forward")
+        self.df[vehicle_columns] = self.df[vehicle_columns].fillna(
+            self.df[vehicle_columns].rolling(window=3, min_periods=1).mean())
+
+    def remove_duplicates(self):
+        """
+        Remove duplicate rows from the dataset.
+        """
+        self.df.drop_duplicates(inplace=True)
+
+    def handle_outliers(self):
+        """
+        Detect and handle outliers using the IQR method with capping.
+        """
+        col = "total number of vehicles"
+
+        Q1 = self.df[col].quantile(0.25)
+        Q3 = self.df[col].quantile(0.75)
+        IQR = Q3 - Q1
+
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        self.df[col] = self.df[col].clip(lower=lower_bound, upper=upper_bound)
 
     def preprocess(self):
         """
@@ -113,6 +137,8 @@ class TrafficPreprocessor:
         self.load_data()
         self.handle_missing_values()
         self.remove_anomalies()
+        self.remove_duplicates()
+        self.handle_outliers()
 
     def save_processed_data(self, output_path):
         """
