@@ -104,7 +104,7 @@ class TrafficPreprocessor:
                            "estimated number"]
 
         self.df[vehicle_columns] = self.df[vehicle_columns].replace(0, np.nan)
-        self.df[vehicle_columns] = self.df[vehicle_columns].interpolate(method="linear", limit=2)
+        self.df[vehicle_columns] = self.df[vehicle_columns].interpolate(method="polynomial", limit=2)
 
     def preprocess(self):
         """
