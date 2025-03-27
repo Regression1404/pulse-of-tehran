@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from persiantools.jdatetime import JalaliDateTime
 
 
@@ -10,6 +9,19 @@ class TrafficPreprocessor:
         """
         self.file_path = file_path
         self.df = None
+
+        self.vehicle_columns = ["total number of vehicles", "number of Class 1 vehicles",
+                                "number of Class 2 vehicles", "number of Class 3 vehicles",
+                                "number of Class 4 vehicles", "number of Class 5 vehicles",
+                                "estimated number"]
+
+        self.speed_column = "average speed"
+
+        self.violation_columns = ["number of speeding violations",
+                                  "number of unauthorized distance violations",
+                                  "number of unauthorized overtaking violations"]
+
+        pd.set_option('future.no_silent_downcasting', True)
 
     def load_data(self):
         """
@@ -49,6 +61,12 @@ class TrafficPreprocessor:
 
         df.set_index("start time", inplace=True)
 
+        for col in self.vehicle_columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df[self.speed_column] = pd.to_numeric(df[self.speed_column], errors="coerce")
+        for col in self.violation_columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
         self.df = df
 
     def handle_missing_values(self):
@@ -58,55 +76,30 @@ class TrafficPreprocessor:
         full_index = pd.date_range(
             start=self.df.index.min().normalize(),
             end=self.df.index.max().normalize() + pd.Timedelta(hours=23),
-            freq="H"
+            freq="h"
         )
 
         self.df = self.df.reindex(full_index)
 
         missing_per_day = self.df["total number of vehicles"].isna().resample("D").sum()
         days_to_drop = missing_per_day[missing_per_day > 8].index
-        self.df = self.df[~self.df.index.date.isin(days_to_drop)]
+        self.df = self.df[~self.df.index.normalize().isin(days_to_drop)]
 
-        vehicle_columns = ["total number of vehicles", "number of Class 1 vehicles",
-                           "number of Class 2 vehicles", "number of Class 3 vehicles",
-                           "number of Class 4 vehicles", "number of Class 5 vehicles",
-                           "estimated number"]
+        self.df[self.vehicle_columns] = self.df[self.vehicle_columns].interpolate(method="time", limit=3)
+        self.df[self.vehicle_columns] = self.df[self.vehicle_columns].fillna(
+            self.df[self.vehicle_columns].rolling(window=3, min_periods=1).mean())
 
-        speed_column = "average speed"
+        self.df[self.speed_column] = self.df[self.speed_column].interpolate(method="time")
 
-        violation_columns = ["number of speeding violations",
-                             "number of unauthorized distance violations",
-                             "number of unauthorized overtaking violations"]
-
-        self.df[vehicle_columns] = self.df[vehicle_columns].interpolate(method="time", limit=3)
-        self.df[vehicle_columns] = self.df[vehicle_columns].fillna(
-            self.df[vehicle_columns].rolling(window=3, min_periods=1).mean())
-
-        self.df[speed_column] = self.df[speed_column].interpolate(method="time")
-
-        self.df[violation_columns] = self.df[violation_columns].fillna(0)
+        self.df[self.violation_columns] = self.df[self.violation_columns].fillna(0)
 
         self.df["end time"] = self.df.index + pd.Timedelta(hours=1)
         self.df["date"] = self.df.index.date.astype(str)
         self.df["start hour"] = self.df.index.hour
         self.df["end hour"] = (self.df["start hour"] + 1) % 24
 
-        self.df["axis code"] = self.df["axis code"].fillna(method="ffill").fillna(method="bfill")
-        self.df["axis name"] = self.df["axis name"].fillna(method="ffill").fillna(method="bfill")
-
-    def remove_anomalies(self):
-        """
-        Replace zero traffic values with interpolated values.
-        """
-        vehicle_columns = ["total number of vehicles", "number of Class 1 vehicles",
-                           "number of Class 2 vehicles", "number of Class 3 vehicles",
-                           "number of Class 4 vehicles", "number of Class 5 vehicles",
-                           "estimated number"]
-
-        self.df[vehicle_columns] = self.df[vehicle_columns].replace(0, np.nan)
-        self.df[vehicle_columns] = self.df[vehicle_columns].interpolate(method="linear", limit_direction="forward")
-        self.df[vehicle_columns] = self.df[vehicle_columns].fillna(
-            self.df[vehicle_columns].rolling(window=3, min_periods=1).mean())
+        self.df["axis code"] = self.df["axis code"].ffill().bfill()
+        self.df["axis name"] = self.df["axis name"].ffill().bfill()
 
     def remove_duplicates(self):
         """
@@ -135,7 +128,6 @@ class TrafficPreprocessor:
         """
         self.load_data()
         self.handle_missing_values()
-        self.remove_anomalies()
         self.remove_duplicates()
         self.handle_outliers()
 
