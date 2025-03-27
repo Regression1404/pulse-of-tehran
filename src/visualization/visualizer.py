@@ -30,7 +30,7 @@ class GraphVisualizer:
         Create a bar chart for a numerical column over the hours of the day.
         """
         plt.figure(figsize=(10, 5))
-        sns.barplot(x="start hour", y=column, data=self.df, palette="viridis")
+        sns.barplot(x="start hour", y=column, data=self.df, hue="start hour", palette="viridis", legend=False)
         plt.xlabel("Hour of the Day")
         plt.ylabel(column)
         plt.title(f"Bar Chart of {column} by Hour")
