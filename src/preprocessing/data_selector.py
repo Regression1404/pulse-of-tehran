@@ -34,9 +34,19 @@ class DataSelector:
         filtered_df = self.df[self.df["month"] == month]
         return _aggregate_hourly_mean(filtered_df)
 
+    def filter_by_month_year(self, month, year):
+        """Return hourly mean data for a specific month and year."""
+        filtered_df = self.df[(self.df["month"] == month) & (self.df["year"] == str(year))]
+        return _aggregate_hourly_mean(filtered_df)
+
     def filter_by_season(self, season):
         """Return hourly mean data for a specific season (spring, summer, autumn, winter)."""
         filtered_df = self.df[self.df["season"] == season]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_season_year(self, season, year):
+        """Return hourly mean data for a specific season and year."""
+        filtered_df = self.df[(self.df["season"] == season) & (self.df["year"] == str(year))]
         return _aggregate_hourly_mean(filtered_df)
 
     def filter_by_weekdays(self):
@@ -44,9 +54,67 @@ class DataSelector:
         filtered_df = self.df[self.df["date"].dt.weekday != 5]
         return _aggregate_hourly_mean(filtered_df)
 
+    def filter_by_weekdays_year(self, year):
+        """Return hourly mean data for weekdays and year"""
+        filtered_df = self.df[(self.df["date"].dt.weekday != 5) & (self.df["year"] == str(year))]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekdays_month(self, month):
+        """Return hourly mean data for weekdays and month"""
+        filtered_df = self.df[(self.df["date"].dt.weekday != 5) & (self.df["month"] == month)]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekdays_season(self, season):
+        """Return hourly mean data for weekdays and season"""
+        filtered_df = self.df[(self.df["date"].dt.weekday != 5) & (self.df["season"] == season)]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekdays_month_year(self, month, year):
+        """Return hourly mean data for weekdays and month and year"""
+        filtered_df = self.df[(self.df["date"].dt.weekday != 5)
+                              & (self.df["month"] == month)
+                              & (self.df["year"] == str(year))]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekdays_season_year(self, season, year):
+        """Return hourly mean data for weekdays and season and year"""
+        filtered_df = self.df[(self.df["date"].dt.weekday != 5)
+                              & (self.df["season"] == season)
+                              & (self.df["year"] == str(year))]
+        return _aggregate_hourly_mean(filtered_df)
+
     def filter_by_weekends(self):
         """Return hourly mean data for weekends (Friday)."""
         filtered_df = self.df[self.df["date"].dt.weekday == 5]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekends_year(self, year):
+        """Return hourly mean data for weekends and year"""
+        filtered_df = self.df[(self.df["date"].dt.weekday == 5) & (self.df["year"] == str(year))]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekends_month(self, month):
+        """Return hourly mean data for weekends and month"""
+        filtered_df = self.df[(self.df["date"].dt.weekday == 5) & (self.df["month"] == month)]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekends_season(self, season):
+        """Return hourly mean data for weekends and season"""
+        filtered_df = self.df[(self.df["date"].dt.weekday == 5) & (self.df["season"] == season)]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekends_month_year(self, month, year):
+        """Return hourly mean data for weekends and month and year"""
+        filtered_df = self.df[(self.df["date"].dt.weekday == 5)
+                              & (self.df["month"] == month)
+                              & (self.df["year"] == year)]
+        return _aggregate_hourly_mean(filtered_df)
+
+    def filter_by_weekends_season_year(self, season, year):
+        """Return hourly mean data for weekends and season and year"""
+        filtered_df = self.df[(self.df["date"].dt.weekday == 5)
+                              & (self.df["season"] == season)
+                              & (self.df["year"] == year)]
         return _aggregate_hourly_mean(filtered_df)
 
     def filter_by_date_range(self, start_date, end_date):
