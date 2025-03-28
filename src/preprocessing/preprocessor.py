@@ -113,12 +113,14 @@ class TrafficPreprocessor:
         """
         col = "total number of vehicles"
 
+        c = 5
+
         Q1 = self.df[col].quantile(0.25)
         Q3 = self.df[col].quantile(0.75)
         IQR = Q3 - Q1
 
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
+        lower_bound = Q1 - 1.5 * (IQR + c)
+        upper_bound = Q3 + 1.5 * (IQR + c)
 
         self.df[col] = self.df[col].clip(lower=lower_bound, upper=upper_bound)
 
