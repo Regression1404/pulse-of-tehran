@@ -3,6 +3,58 @@ import pandas as pd
 import seaborn as sns
 
 
+def plot_hourly_trend_from_dfs(data, column):
+    """
+    Plots a line graph for a given column from multiple DataFrames with labels.
+
+    Parameters:
+    - data: list of dicts like {'df': DataFrame, 'label': str}
+    - column: column name to plot from each DataFrame
+    """
+
+    sns.set_theme(style="darkgrid")
+
+    plt.figure(figsize=(12, 6))
+
+    for item in data:
+        df = item["df"]
+        label = item["label"]
+        if column in df.columns:
+            sns.lineplot(x="start hour", y=column, data=df, linewidth=2, label=label)
+
+    plt.title(f"Hourly Trend of {column}")
+    plt.xlabel("Hour of the Day")
+    plt.ylabel(column)
+    plt.xticks(range(24))
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_graph_from_dfs(data, column1, column2):
+    """
+    Plots a line graph for 2 given columns from multiple DataFrames with labels.
+    """
+
+    sns.set_theme(style="darkgrid")
+
+    plt.figure(figsize=(12, 6))
+
+    for item in data:
+        df = item["df"]
+        label = item["label"]
+        sns.lineplot(x=column1, y=column2, data=df, linewidth=2, label=label)
+
+    plt.title(f"{column2} by {column1}")
+    plt.xlabel(column2)
+    plt.ylabel(column2)
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
 class GraphVisualizer:
     def __init__(self, df):
         """
