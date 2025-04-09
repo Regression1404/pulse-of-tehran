@@ -3,7 +3,7 @@ import pandas as pd
 import seaborn as sns
 
 
-def plot_hourly_trend_from_dfs(data, column):
+def plot_hourly_trend_from_dfs(data, column, max_yticks=10):
     """
     Plots a line graph for a given column from multiple DataFrames with labels.
 
@@ -28,6 +28,10 @@ def plot_hourly_trend_from_dfs(data, column):
     plt.xticks(range(24))
     plt.legend()
     plt.grid(True)
+
+    ax = plt.gca()
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=max_yticks))
+
     plt.tight_layout()
     plt.show()
 
