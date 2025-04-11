@@ -1,5 +1,9 @@
 import pandas as pd
+import numpy as np
+from scipy.spatial.distance import euclidean
+from scipy.stats import ks_2samp
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import mean_squared_error
 
 
 class DataFrameComparer:
@@ -48,6 +52,14 @@ class DataFrameComparer:
             ratio_results[column] = ratio
         return ratio_results
 
+    def kolmogorov_smirnov_test(self):
+        ks_results = {}
+        for column in self.columns:
+            stat, p_value = ks_2samp(self.df1[column], self.df2[column])
+            ks_results[column] = {"D-statistic": stat, "p-value": p_value}
+
+        return ks_results
+
     def cosine_similarity(self):
         """
         Calculates the Cosine Similarity between two DataFrames for each column.
@@ -69,6 +81,7 @@ class DataFrameComparer:
             "Pearson Correlation": self.pearson_correlation(),
             "Spearman Correlation": self.spearman_correlation(),
             "Ratio Analysis": self.ratio_analysis(),
+            "KS Results": self.kolmogorov_smirnov_test(),
             "Cosine Similarity": self.cosine_similarity()
         }
         return results

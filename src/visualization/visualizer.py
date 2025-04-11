@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from matplotlib.ticker import MaxNLocator
 
 
 def plot_hourly_trend_from_dfs(data, column, max_yticks=10):
