@@ -25,6 +25,7 @@ class GraphVisualizer:
         plt.grid(True)
         plt.show()
 
+    
     def plot_bar_chart(self, column):
         """
         Create a bar chart for a numerical column over the hours of the day.
@@ -129,3 +130,22 @@ class GraphVisualizer:
         plt.legend()
         plt.grid(True)
         plt.show()
+
+    
+    def plot_hourly_trend_on_ax(self, column, ax=None, label=None):
+        """
+        Plot the trend of a numerical column over the hours of the day on a shared axis.
+        """
+        hourly_avg = self.df.groupby("start hour")[column].mean().reset_index()
+        sns.lineplot(
+            x="start hour",
+            y=column,
+            data=hourly_avg,
+            marker="o",
+            linewidth=2,
+            ax=ax,
+            label=label
+        )
+     
+
+        
