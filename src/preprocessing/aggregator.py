@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from fontTools.merge.util import equal
 
 from src.preprocessing import TrafficPreprocessor
 
@@ -35,6 +36,33 @@ class Aggregator:
 
                 if os.path.exists(file_path):
                     df = preprocess(file_path)
+
+                    df["year"] = year
+                    df["month"] = month
+                    df["season"] = self.seasons[month]
+
+                    dataframes.append(df)
+
+        if dataframes:
+            return pd.concat(dataframes, ignore_index=True)
+        else:
+            return pd.DataFrame()
+
+    def aggregate_specific_data(self, path="proceed", year=None):
+        """Aggregate and preprocess data from multiple files."""
+        if year is None:
+            year = ['1403']
+        dataframes = []
+
+        if path != self.base_path:
+            path = os.path.join(self.base_path, path)
+
+        for year in year:
+            for month in self.months:
+                file_path = os.path.join(path, year, month, self.file_name)
+
+                if os.path.exists(file_path):
+                    df = pd.read_excel(file_path)
 
                     df["year"] = year
                     df["month"] = month

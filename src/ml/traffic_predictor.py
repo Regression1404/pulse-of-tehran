@@ -40,8 +40,6 @@ class TrafficVolumePredictor:
 
         x_input = x_input.copy()
 
-        x_input["day of week"] = x_input["start time"].dt.dayofweek
-
         x_input["year_from_prediction"] = 0
 
         x_input = x_input[self.features]

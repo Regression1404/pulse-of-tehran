@@ -82,14 +82,21 @@ class TrafficPreprocessor:
         self.df = self.df.reindex(full_index)
 
         missing_per_day = self.df["total number of vehicles"].isna().resample("D").sum()
-        days_to_drop = missing_per_day[missing_per_day > 8].index
+        days_to_drop = missing_per_day[missing_per_day == 24].index
         self.df = self.df[~self.df.index.normalize().isin(days_to_drop)]
 
         self.df[self.vehicle_columns] = self.df[self.vehicle_columns].interpolate(method="time", limit=3)
         self.df[self.vehicle_columns] = self.df[self.vehicle_columns].fillna(
             self.df[self.vehicle_columns].rolling(window=3, min_periods=1).mean())
+        self.df[self.vehicle_columns] = self.df[self.vehicle_columns].fillna(
+            self.df[self.vehicle_columns].rolling(window=6, min_periods=1).mean()
+        )
+        self.df[self.vehicle_columns] = self.df[self.vehicle_columns].fillna(
+            self.df[self.vehicle_columns].rolling(window=12, center=True, min_periods=1).mean()
+        )
+        self.df[self.vehicle_columns] = self.df[self.vehicle_columns].ffill().bfill()
 
-        self.df[self.speed_column] = self.df[self.speed_column].interpolate(method="time")
+        self.df[self.speed_column] = self.df[self.speed_column].interpolate(method="time", limit=3)
 
         self.df[self.violation_columns] = self.df[self.violation_columns].fillna(0)
 
@@ -135,6 +142,6 @@ class TrafficPreprocessor:
 
     def save_processed_data(self, output_path):
         """
-        Save the processed data to a new CSV file.
+        Save the processed data to a new Excel file.
         """
-        self.df.to_csv(output_path)
+        self.df.to_excel(output_path, index=False)

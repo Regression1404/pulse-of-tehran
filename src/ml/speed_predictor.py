@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 class SpeedPredictor:
     def __init__(self, dataframe, model=LinearRegression(), target_column="average speed"):
         self.model = model
-        self.features = ["start hour", "day of week", "month", "axis code", "total number of vehicles",
+        self.features = ["start hour", "day of week", "month", "axis code", "predicted_speed",
                          "year_from_prediction"]
         dataframe["day of week"] = dataframe["start time"].dt.dayofweek
         self.df = dataframe
@@ -37,7 +37,6 @@ class SpeedPredictor:
 
     def predict(self, x_input):
         x_input = x_input.copy()
-        x_input["day of week"] = x_input["start time"].dt.dayofweek
         x_input["year_from_prediction"] = 0  # since it's the target year
         x_input = x_input[self.features]
         return self.model.predict(x_input)

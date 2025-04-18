@@ -24,7 +24,7 @@ class SpeedClassifier:
         Initializes the TrafficSpeedPredictor class.
         """
         self.model = model
-        self.features = ["start hour", "day of week", "month", "axis code", "total number of vehicles",
+        self.features = ["start hour", "day of week", "month", "axis code", "predicted_speed",
                          "year_from_prediction"]
 
         self.df = dataframe.copy()
@@ -59,7 +59,6 @@ class SpeedClassifier:
         :param input_data: DataFrame containing the features for prediction
         :return: Predicted traffic speed category
         """
-        input_data["day of week"] = input_data["start time"].dt.dayofweek
         input_data["year_from_prediction"] = 0
 
         input_features = input_data[self.features]

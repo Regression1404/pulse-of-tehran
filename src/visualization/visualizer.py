@@ -2,9 +2,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import MaxNLocator
+from arabic_reshaper import reshape
+from bidi.algorithm import get_display
 
 
-def plot_hourly_trend_from_dfs(data, column, max_yticks=10):
+def plot_hourly_trend_from_dfs(data, column, column_label, axis_name, max_yticks=10):
     """
     Plots a line graph for a given column from multiple DataFrames with labels.
 
@@ -19,13 +21,21 @@ def plot_hourly_trend_from_dfs(data, column, max_yticks=10):
 
     for item in data:
         df = item["df"]
-        label = item["label"]
+        label = get_display(reshape(item["label"]))
         if column in df.columns:
             sns.lineplot(x="start hour", y=column, data=df, linewidth=2, label=label)
 
-    plt.title(f"Hourly Trend of {column}")
-    plt.xlabel("Hour of the Day")
-    plt.ylabel(column)
+            peak_row = df.loc[df[column].idxmax()]
+            peak_hour = peak_row['start hour']
+            peak_value = peak_row[column]
+
+            plt.scatter(peak_hour, peak_value, s=100, zorder=5, label=get_display(reshape(f"مقدار اوج: {int(peak_value)}")))
+            plt.text(peak_hour + 1, peak_value, '',
+                     ha='center', fontsize=12, fontweight='bold')
+
+    plt.title(get_display(reshape(f"روند ساعتی  {column_label} در {axis_name}")))
+    plt.xlabel(get_display(reshape("ساعت")))
+    plt.ylabel(get_display(reshape(column_label)))
     plt.xticks(range(24))
     plt.legend()
     plt.grid(True)
