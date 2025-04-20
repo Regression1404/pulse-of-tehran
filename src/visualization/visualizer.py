@@ -2,8 +2,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import MaxNLocator
+from arabic_reshaper import reshape
+from bidi.algorithm import get_display
 
-def plot_hourly_trend_from_dfs(data, column, max_yticks=10):
+
+def plot_hourly_trend_from_dfs(data, column, column_label, axis_name, max_yticks=10):
     """
     Plots a line graph for a given column from multiple DataFrames with labels.
 
@@ -18,13 +21,21 @@ def plot_hourly_trend_from_dfs(data, column, max_yticks=10):
 
     for item in data:
         df = item["df"]
-        label = item["label"]
+        label = get_display(reshape(item["label"]))
         if column in df.columns:
             sns.lineplot(x="start hour", y=column, data=df, linewidth=2, label=label)
 
-    plt.title(f"Hourly Trend of {column}")
-    plt.xlabel("Hour of the Day")
-    plt.ylabel(column)
+            peak_row = df.loc[df[column].idxmax()]
+            peak_hour = peak_row['start hour']
+            peak_value = peak_row[column]
+
+            plt.scatter(peak_hour, peak_value, s=100, zorder=5, label=get_display(reshape(f"مقدار اوج: {int(peak_value)}")))
+            plt.text(peak_hour + 1, peak_value, '',
+                     ha='center', fontsize=12, fontweight='bold')
+
+    plt.title(get_display(reshape(f"روند ساعتی  {column_label} در {axis_name}")))
+    plt.xlabel(get_display(reshape("ساعت")))
+    plt.ylabel(get_display(reshape(column_label)))
     plt.xticks(range(24))
     plt.legend()
     plt.grid(True)
@@ -81,7 +92,6 @@ class GraphVisualizer:
         plt.grid(True)
         plt.show()
 
-    
     def plot_bar_chart(self, column):
         """
         Create a bar chart for a numerical column over the hours of the day.
@@ -186,22 +196,3 @@ class GraphVisualizer:
         plt.legend()
         plt.grid(True)
         plt.show()
-
-    
-    def plot_hourly_trend_on_ax(self, column, ax=None, label=None):
-        """
-        Plot the trend of a numerical column over the hours of the day on a shared axis.
-        """
-        hourly_avg = self.df.groupby("start hour")[column].mean().reset_index()
-        sns.lineplot(
-            x="start hour",
-            y=column,
-            data=hourly_avg,
-            marker="o",
-            linewidth=2,
-            ax=ax,
-            label=label
-        )
-     
-
-        
